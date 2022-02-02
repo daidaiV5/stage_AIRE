@@ -135,9 +135,15 @@ if (!require("ggplot2")) {
    }
 if (!require("WGCNA")){
     BiocManager::install("WGCNA", dependencies = TRUE) 
-   }
+}
+if (!require("sp")){
+  BiocManager::install("sp", dependencies = TRUE) 
+}
+
+
 library("DESeq2")
 library("ggplot2")
+library("sp")
   
 ##### LOAD DATA #######################################################
 batCts <- as.matrix(read.csv(file=paste(initFolder, file_mat, sep = ""),
