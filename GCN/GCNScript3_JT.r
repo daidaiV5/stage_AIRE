@@ -31,6 +31,8 @@ if("--help" %in% Args) {
       --thr=threshold		               - 1-Pval Student threshold for significqnt pearson correlations (default 0.95)
       --pthr=pthreshold                - Pearson correlation threshold above which to keep edges (default 0.5)
       --min=minimum_reads              - Minimum number of reads to determine correlations (default 20)
+      --type_ellipse                   - The type of ellipse. The default t assumes a multivariate t-distribution, and norm assumes a multivariate normal distribution.(default t)
+      --thr_ellipse                    - threshold for the ellipse  (default 0.95)
       --help                           - print this text
  
       Example:
@@ -97,6 +99,19 @@ if(is.null(argsL$thr)) {
 } else {thr <- argsL$thr}
 # make sure it's a float
 thr <- as.double(thr)
+
+#####for PCA : type of ellipse 
+if(is.null(argsL$type_ellipse)) {
+  print("type_ellipse")
+  type_ellipse <- 't'
+} else {type_ellipse <- argsL$type_ellipse}
+
+if(is.null(argsL$thr_ellipse)) {
+  print("threshold default value : 0.95")
+  thr_ellipse <- 0.95
+} else {thr_ellipse <- argsL$thr_ellipse}
+thr_ellipse <- as.double(thr_ellipse)
+
 
 ######
 # Threshold for Pearson correlations
@@ -189,7 +204,7 @@ vst <- vst(dds, blind=FALSE)
 
 data=plotPCA(vst, intgroup = dataname, returnData=TRUE)
 p=ggplot(data, aes(PC1, PC2,  shape=dataname))+   geom_point(size=3) +
-  stat_ellipse()
+  stat_ellipse(type=type_ellipse,level=thr_ellipse)
 
 
 # Extract components
