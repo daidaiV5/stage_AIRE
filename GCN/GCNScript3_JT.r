@@ -162,6 +162,8 @@ colnames(batCts) <- lapply(colnames(batCts) , function(x){gsub("\\.", "-", x)}) 
 
 #head(batCts)
 all(rownames(batcoldata) == colnames(batCts))
+batcoldata['in.ell']='TRUE'
+dataname = 'in.ell'
 dds <- DESeqDataSetFromMatrix(countData = batCts,
                                 colData = batcoldata,
                                 design = ~ 1)
@@ -173,7 +175,34 @@ dds <- DESeq(dds)
 keep <- rowSums(counts(dds)) >= min							# Parameter: keep only rows with total counts >= min ***
 dds <- dds[keep,]
 ##### END LOAD DATA #####################################################
-  
+
+
+#### plot ACP #####################################################
+
+vst <- vst(dds, blind=FALSE)
+
+data=plotPCA(vst, intgroup = dataname, returnData=TRUE)
+p=ggplot(data, aes(PC1, PC2,  shape=dataname))+   geom_point(size=3) +
+  stat_ellipse()
+
+
+# Extract components
+build <- ggplot_build(p)$data
+points <- build[[1]]
+ell <- build[[2]]
+
+# Find which points are inside the ellipse, and add this to the data
+dat <- data.frame(
+  in.ell = as.logical(point.in.polygon(points$x, points$y, ell$x, ell$y))
+)
+
+data['in.ell']=dat
+
+data_list_neto=c(row.names(data)[which(data$in.ell==TRUE)])
+dds <- dds[,data_list_neto]
+
+#### plot ACP #####################################################
+
 ##### COMPUTE NORMALISATION #############################################
 vst <- vst(dds, blind=FALSE)
 
