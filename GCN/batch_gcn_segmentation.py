@@ -19,6 +19,7 @@ def parser():
     parser.add_argument("-pthr", "--pearson_threshold", type=float, help=" Pearson correlation threshold "
                                                                          "(default: 0.5)", default=0.5)
     parser.add_argument("-min", "--min_reads", type=int, help="minimum number of reads to consider (default: 20)", default=20)
+    parser.add_argument("--repeat_times", "-rt", type=int, help="time repear (default: 1)", default=1)
     args = parser.parse_args()
     paths_matrices = args.paths_matrices
     paths_annot = args.paths_annot
@@ -26,7 +27,8 @@ def parser():
     thr = 1 - args.student_threshold
     pthr = args.pearson_threshold
     min_reads = args.min_reads
-    return paths_matrices, paths_annot, outdir, thr, pthr, min_reads
+    repeat_times=args.repeat_times
+    return paths_matrices, paths_annot, outdir, thr, pthr, min_reads,repeat_times
 
 
 def file_to_list(path):
@@ -123,30 +125,32 @@ def write_segmented(path_to_gcn, path_to_segmented, path_to_nodelist, absolute=T
 
 
 # user input
-paths_matrices, paths_annot, outdir, thr, pthr, min_reads = parser()
+paths_matrices, paths_annot, outdir, thr, pthr, min_reads,repeat_times = parser()
 
-# hard-coded range of Pearson thresholds to segment the large GCN
-thrs = ["0.8", "0.85", "0.9", "0.95"]
+for repeat_time in range(1,repeat_times+1)
+    # hard-coded range of Pearson thresholds to segment the large GCN
+    thrs = ["0.8", "0.85", "0.9", "0.95"]
 
-# create the output directory
-make_output_directory(outdir)
+    # create the output directory
+    make_output_directory(outdir)
 
-# store paths to matrices and annotations in dictionaries with age-classe, sex, organ as keys
-dico_matrices = read_dictionary(paths_matrices, sep="\t")
-dico_annot = read_dictionary(paths_annot, sep="\t")
+    # store paths to matrices and annotations in dictionaries with age-classe, sex, organ as keys
+    dico_matrices = read_dictionary(paths_matrices, sep="\t")
+    dico_annot = read_dictionary(paths_annot, sep="\t")
 
-# create subfolders for each age-class, to store in an outpaths dictionary:
-outpaths = {}
-for age_class, sex, organ in dico_matrices:
-    path = os.path.join(outdir, organ, sex, age_class)
-    make_output_directory(path)
-    outpaths[(age_class, sex, organ)] = path
+    # create subfolders for each age-class, to store in an outpaths dictionary:
+    outpaths = {}
+    for age_class, sex, organ in dico_matrices:
+        path = os.path.join(outdir, organ, sex, age_class)
+        make_output_directory(path)
+        outpaths[(age_class, sex, organ,repeat_times)] = path
 
-# define radicals for file names in a third dictionary
-radicals = {}
-for (age_class, sex, organ), path in dico_matrices.items():
-    radical = path.split("/")[-1].split(".")[0]
-    radicals[(age_class, sex, organ)] = radical
+    # define radicals for file names in a third dictionary
+    radicals = {}
+    for (age_class, sex, organ), path in dico_matrices.items():
+        radical = path.split("/")[-1].split(".")[0]
+        radicals[(age_class, sex, organ,repeat_times)] = radical
+    print("resussite jusqu a ici")
 
 # use R script to calculate GCNs
 
