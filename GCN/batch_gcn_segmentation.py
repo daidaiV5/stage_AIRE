@@ -130,6 +130,7 @@ outpaths = {}
 radicals = {}
 for repeat_time in range(1,repeat_times+1):
     # hard-coded range of Pearson thresholds to segment the large GCN
+    repeat_time=str(repeat_time)
     thrs = ["0.8", "0.85", "0.9", "0.95"]
 
     # create the output directory
@@ -138,12 +139,16 @@ for repeat_time in range(1,repeat_times+1):
     # store paths to matrices and annotations in dictionaries with age-classe, sex, organ as keys
     dico_matrices = read_dictionary(paths_matrices, sep="\t")
     dico_annot = read_dictionary(paths_annot, sep="\t")
+    print(dico_matrices)
+
+
 
     # create subfolders for each age-class, to store in an outpaths dictionary:
     for age_class, sex, organ in dico_matrices:
         path = os.path.join(outdir, organ, sex, age_class,repeat_time)
         make_output_directory(path)
         outpaths[(age_class, sex, organ,repeat_time)] = path
+        
 
     # define radicals for file names in a third dictionary
     for (age_class, sex, organ), path in dico_matrices.items():

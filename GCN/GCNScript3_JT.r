@@ -33,6 +33,7 @@ if("--help" %in% Args) {
       --min=minimum_reads              - Minimum number of reads to determine correlations (default 20)
       --type_ellipse                   - The type of ellipse. The default t assumes a multivariate t-distribution, and norm assumes a multivariate normal distribution.(default t)
       --thr_ellipse                    - threshold for the ellipse  (default 0.95)
+      --samping                        - number of the samping
       --help                           - print this text
  
       Example:
@@ -102,9 +103,13 @@ thr <- as.double(thr)
 
 #####for PCA : type of ellipse 
 if(is.null(argsL$type_ellipse)) {
-  print("type_ellipse")
+  print("type_ellipse:t")
   type_ellipse <- 't'
-} else {type_ellipse <- argsL$type_ellipse}
+} else {
+  type_ellipse <- argsL$type_ellipse
+  print(type_ellipse)
+  }
+
 
 if(is.null(argsL$thr_ellipse)) {
   print("threshold default value : 0.95")
@@ -132,6 +137,13 @@ if(is.null(argsL$min)) {
 } else {min <- argsL$min}
 # make sure it's an integer
 min <- round(as.double(min))
+
+if(is.null(argsL$samping)) {
+  print("number of samping: 15") 
+  samping <- 15
+} else {samping <- argsL$samping}
+# make sure it's an integer
+samping <- round(as.double(samping))
 
 ############# END INPUT STEP
 
@@ -167,6 +179,7 @@ batCts <- as.matrix(read.csv(file=paste(initFolder, file_mat, sep = ""),
 
 batcoldata <- read.csv(file=paste(initFolder, file_annot, sep = ""),
                          header = TRUE, sep =",", row.names = "samples")              ## To do: parameterize row.names -- h-coded to "samples" ***
+
 
   
 #colnames(batCts) <- sub("_raw","", colnames(batCts))				      # alt 1 : unused
@@ -220,9 +233,26 @@ dat <- data.frame(
 data['in.ell']=dat
 
 data_list_neto=c(row.names(data)[which(data$in.ell==TRUE)])
-dds <- dds[,data_list_neto]
 
-#### plot ACP #####################################################
+p=ggplot(data, aes(PC1, PC2,  shape=dataname)) +
+  geom_point(aes(col = in.ell)) +
+  stat_ellipse(type=type_ellipse,level=thr_ellipse)+geom_text(aes(label=name),size=2)
+
+ggsave(p,filename = paste(radical,".pdf",sep=""),width = 12,height = 9)
+
+print("end of filtering plot ACP")
+
+####end of plot ACP #####################################################
+
+if(length(data_list_neto) < samping){
+  print("Error:number of the samping isn't enough")
+  dds <-dds[,data_list_neto]
+}else{
+  print(paste("ramdom:number of the samping :", samping,sep = " "))
+  a=sample(data_list_neto,samping)
+  dds <- dds[,a]
+}
+
 
 ##### COMPUTE NORMALISATION #############################################
 vst <- vst(dds, blind=FALSE)
