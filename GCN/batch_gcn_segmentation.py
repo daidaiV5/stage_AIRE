@@ -126,8 +126,9 @@ def write_segmented(path_to_gcn, path_to_segmented, path_to_nodelist, absolute=T
 
 # user input
 paths_matrices, paths_annot, outdir, thr, pthr, min_reads,repeat_times = parser()
-
-for repeat_time in range(1,repeat_times+1)
+outpaths = {}
+radicals = {}
+for repeat_time in range(1,repeat_times+1):
     # hard-coded range of Pearson thresholds to segment the large GCN
     thrs = ["0.8", "0.85", "0.9", "0.95"]
 
@@ -139,27 +140,25 @@ for repeat_time in range(1,repeat_times+1)
     dico_annot = read_dictionary(paths_annot, sep="\t")
 
     # create subfolders for each age-class, to store in an outpaths dictionary:
-    outpaths = {}
     for age_class, sex, organ in dico_matrices:
-        path = os.path.join(outdir, organ, sex, age_class)
+        path = os.path.join(outdir, organ, sex, age_class,repeat_time)
         make_output_directory(path)
-        outpaths[(age_class, sex, organ,repeat_times)] = path
+        outpaths[(age_class, sex, organ,repeat_time)] = path
 
     # define radicals for file names in a third dictionary
-    radicals = {}
     for (age_class, sex, organ), path in dico_matrices.items():
         radical = path.split("/")[-1].split(".")[0]
-        radicals[(age_class, sex, organ,repeat_times)] = radical
-    print("resussite jusqu a ici")
+        radicals[(age_class, sex, organ,repeat_time)] = radical
+
 
 # use R script to calculate GCNs
 
 segmented = {}
 nodelists = {}
-for (age_class, sex, organ), path_m in dico_matrices.items():
-    path_a = dico_annot[(age_class, sex, organ)]
-    radical = radicals[(age_class, sex, organ)]
-    outpath = outpaths[(age_class, sex, organ)]
+for (age_class, sex, organ,repeat_time), path_m in dico_matrices.items():
+    path_a = dico_annot[(age_class, sex, organ,repeat_time)]
+    radical = radicals[(age_class, sex, organ,repeat_time)]
+    outpath = outpaths[(age_class, sex, organ,repeat_time)]
     command = f"Rscript GCNScript3_JT.r --in_mat={path_m} --annot={path_a} --out={radical} --dir={outpath} --min={min_reads} --thr={thr} --pthr={pthr}"
     execute(command)
 
