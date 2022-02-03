@@ -128,6 +128,7 @@ def write_segmented(path_to_gcn, path_to_segmented, path_to_nodelist, absolute=T
 paths_matrices, paths_annot, outdir, thr, pthr, min_reads,repeat_times = parser()
 outpaths = {}
 radicals = {}
+dico_new_matrices={}
 for repeat_time in range(1,repeat_times+1):
     # hard-coded range of Pearson thresholds to segment the large GCN
     repeat_time=str(repeat_time)
@@ -141,7 +142,9 @@ for repeat_time in range(1,repeat_times+1):
     dico_annot = read_dictionary(paths_annot, sep="\t")
     print(dico_matrices)
 
-
+    for age_class, sex, organ in dico_matrices:
+        dico_matrices[age_class,sex,organ]
+        dico_new_matrices[age_class,sex,organ,test]=dico_matrices[age_class,sex,organ]
 
     # create subfolders for each age-class, to store in an outpaths dictionary:
     for age_class, sex, organ in dico_matrices:
@@ -160,7 +163,7 @@ for repeat_time in range(1,repeat_times+1):
 
 segmented = {}
 nodelists = {}
-for (age_class, sex, organ,repeat_time), path_m in dico_matrices.items():
+for (age_class, sex, organ,repeat_time), path_m in dico_new_matrices.items():
     path_a = dico_annot[(age_class, sex, organ,repeat_time)]
     radical = radicals[(age_class, sex, organ,repeat_time)]
     outpath = outpaths[(age_class, sex, organ,repeat_time)]
@@ -176,12 +179,12 @@ for (age_class, sex, organ,repeat_time), path_m in dico_matrices.items():
         segpath2 = os.path.join(outpath, f"{radical}_filtered_positive_cor_{segthr}.csv")
         make_output_file(segpath1)
         make_output_file(segpath2)
-        segmented[(age_class, sex, organ, segthr)] = {"all": segpath1, "pos": segpath2}
+        segmented[(age_class, sex, organ, repeat_time ,segthr)] = {"all": segpath1, "pos": segpath2}
         nodes1 = os.path.join(outpath, f"{radical}_filtered_all_cor_{segthr}_nodes.txt")
         nodes2 = os.path.join(outpath, f"{radical}_filtered_positive_cor_{segthr}_nodes.txt")
         make_output_file(nodes1)
         make_output_file(nodes2)
-        nodelists[(age_class, sex, organ, segthr)] = {"all": nodes1, "pos": nodes2}
+        nodelists[(age_class, sex, organ, repeat_time ,segthr)] = {"all": nodes1, "pos": nodes2}
 
         gcn = os.path.join(outpath, f"{radical}_gcn_edges_cor_{pthr}.csv")
         write_segmented(gcn, segpath1, nodes1, absolute=True)
@@ -196,11 +199,11 @@ path_file = f"./path_to_edgefiles.csv"
 make_output_file(path_file)
 with open(path_file, "a") as f:
     f.write(f"age_class\tsex\torgan\tPearson_thr\tcorrelations\tpath\n")
-    for (age_class, sex, organ), dir in outpaths.items():
-        radical = radicals[(age_class, sex, organ)]
+    for (age_class, sex, organ,repeat_time ), dir in outpaths.items():
+        radical = radicals[(age_class, sex, organ,repeat_time)]
         filepath = os.path.join(dir, f"{radical}_gcn_edges_cor_{pthr}.csv")
         f.write(f"{age_class}\t{sex}\t{organ}\t{pthr}\tall\t{filepath}\n")
-    for (age_class, sex, organ, segthr), paths in segmented.items():
+    for (age_class, sex, organ,repeat_time,segthr), paths in segmented.items():
         for cor, path in paths.items():
             f.write(f"{age_class}\t{sex}\t{organ}\t{segthr}\t{cor}\t{path}\n")
 
@@ -208,11 +211,11 @@ path_file = f"./path_to_nodelists.csv"
 make_output_file(path_file)
 with open(path_file, "a") as f:
     f.write(f"age_class\tsex\torgan\tPearson_thr\tcorrelations\tpath\n")
-    for (age_class, sex, organ), dir in outpaths.items():
-        radical = radicals[(age_class, sex, organ)]
+    for (age_class, sex, organ,repeat_time), dir in outpaths.items():
+        radical = radicals[(age_class, sex, organ,repeat_time)]
         filepath = os.path.join(dir, f"{radical}_gcn_nodes_cor_{pthr}.txt")
         f.write(f"{age_class}\t{sex}\t{organ}\t{pthr}\tall\t{filepath}\n")
-    for (age_class, sex, organ, segthr), paths in nodelists.items():
+    for (age_class, sex, organ,repeat_time,segthr), paths in nodelists.items():
         for cor, path in paths.items():
             f.write(f"{age_class}\t{sex}\t{organ}\t{segthr}\t{cor}\t{path}\n")
 
