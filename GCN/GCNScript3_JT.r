@@ -178,11 +178,11 @@ library('vegan')
   
 ##### LOAD DATA #######################################################
 batCts <- as.matrix(read.csv(file=paste(initFolder, file_mat, sep = ""),
-                               header=TRUE, sep=",", row.names = "gene_id")) ## To do: parameterize row.names -- h-coded to "gene_id" ***
+                               header=TRUE, sep=",", row.names = 1)) ## To do: parameterize row.names -- h-coded to "gene_id" ***
 
 
 batcoldata <- read.csv(file=paste(initFolder, file_annot, sep = ""),
-                         header = TRUE, sep =",", row.names = "samples")              ## To do: parameterize row.names -- h-coded to "samples" ***
+                         header = TRUE, sep =",", row.names = 1)              ## To do: parameterize row.names -- h-coded to "samples" ***
 
 
   
@@ -257,17 +257,6 @@ for (i in seq(1,cluster,by=1)){
 
 
 
-p=ggplot(df_final, aes(PC1, PC2, color =as.factor(df_final$group), shape =as.factor(df_final$in.ell),label=name))+ geom_text() + geom_point(size=3) +
-  stat_ellipse(geom="polygon", aes(fill = as.factor(df_final$group)), 
-               
-               alpha = 0.2, 
-               
-               show.legend = TRUE, 
-               type='t',
-               
-               level = 0.99) 
-
-ggsave(p,filename = paste(name_test,".pdf",sep=""),width = 12,height = 9,path = radical,)
 print("end of filtering plot ACP")
 
 
