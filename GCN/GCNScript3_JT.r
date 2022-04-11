@@ -257,7 +257,7 @@ for (i in seq(1,cluster,by=1)){
 
 
 
-ggplot(df_final, aes(PC1, PC2, color =as.factor(df_final$group), shape =as.factor(df_final$in.ell),label=name))+ geom_text() + geom_point(size=3) +
+p=ggplot(df_final, aes(PC1, PC2, color =as.factor(df_final$group), shape =as.factor(df_final$in.ell),label=name))+ geom_text() + geom_point(size=3) +
   stat_ellipse(geom="polygon", aes(fill = as.factor(df_final$group)), 
                
                alpha = 0.2, 
@@ -303,7 +303,7 @@ vst <- vst(dds, blind=FALSE)
 # load WGCNA library #########
 library("WGCNA")
 options(stringsAsFactors = FALSE);
-allowWGCNAThreads()
+allowWGCNAThreads(nThreads=20)
 ## END load WGCNA library ####
 
 vst <- assay(vst)
