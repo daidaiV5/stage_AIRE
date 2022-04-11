@@ -10,8 +10,8 @@
 setwd("/Users/daiyuping/Desktop/stageM2/echantionage")
 
 
-file_mat = "/Users/daiyuping/Desktop/stageM2/echantionage/dataset_test/male_20_sub/matrices/wholeblood_male_20-29_sub_20.csv"
-file_annot = "/Users/daiyuping/Desktop/stageM2/echantionage/dataset_test/male_20_sub/annot/wholeblood_male_20-29_annotation.csv"
+file_mat = "/home/storage_1/yuping/GCN/dataset_test/male_20_sub/matrices/wholeblood_male_20-29_sub_20.csv"
+file_annot = "/home/storage_1/yuping/GCN/dataset_test/male_20_sub/annot/wholeblood_male_20-29_annotation.csv"
 min = 20
 
 dataname = "AGE"
@@ -62,7 +62,13 @@ dds <- dds[keep,]
 vst <- vst(dds, blind=FALSE)
 vst
 
+
+
+
+
 data=plotPCA(vst, intgroup = dataname, returnData=TRUE)
+
+data[dataname]=
 p=ggplot(data, aes(PC1, PC2,  shape=dataname))+   geom_point(size=3) +
   stat_ellipse(type = "t",level = 0.95)
 

@@ -21,6 +21,8 @@ dataname = "AGE"
 
 library("DESeq2")
 library("ggplot2")
+library("factoextra")
+library("NbClust")
   
 ##### LOAD DATA #######################################################
 batCts <- as.matrix(read.csv(file=file_mat,
@@ -56,6 +58,14 @@ dds <- dds[keep,]
   
 ##### COMPUTE NORMALISATION #############################################
 vst <- vst(dds, blind=FALSE)
+
+df2=assay(vst)
+df=t(scale(df2))
+
+nc <- NbClust(df, distance="euclidean", 
+              min.nc=2, max.nc=4, method="kmeans")
+
+
 z <- plotPCA(vst, intgroup = dataname)
 z + geom_text(aes(label = name), size = 2, colour = "black")
 

@@ -166,11 +166,15 @@ if (!require("WGCNA")){
 if (!require("sp")){
   BiocManager::install("sp", dependencies = TRUE) 
 }
+if (!require("vegan")){
+  BiocManager::install("vegan", dependencies = TRUE) 
+}
 
 
 library("DESeq2")
 library("ggplot2")
 library("sp")
+library('vegan')
   
 ##### LOAD DATA #######################################################
 batCts <- as.matrix(read.csv(file=paste(initFolder, file_mat, sep = ""),
@@ -196,8 +200,8 @@ colnames(batCts) <- lapply(colnames(batCts) , function(x){gsub("\\.", "-", x)}) 
 
 #head(batCts)
 all(rownames(batcoldata) == colnames(batCts))
-batcoldata['in.ell']='TRUE'
-dataname = 'in.ell'
+dataname = "group"
+batcoldata['group']='A'
 dds <- DESeqDataSetFromMatrix(countData = batCts,
                                 colData = batcoldata,
                                 design = ~ 1)
@@ -216,39 +220,76 @@ dds <- dds[keep,]
 vst <- vst(dds, blind=FALSE)
 
 data=plotPCA(vst, intgroup = dataname, returnData=TRUE)
-p=ggplot(data, aes(PC1, PC2,  shape=dataname))+   geom_point(size=3) +
-  stat_ellipse(type=type_ellipse,level=thr_ellipse)
+
+### cluster with k-means; The optimal number of clusters is defined byCalinski-Harabasz index
+df=t(scale(assay(vst)))
+model <- cascadeKM(df, 1, 10, iter = 100)
+model$results[2,]
+cluster=which.max(model$results[2,])
+x=as.matrix(model$partition)
+data[dataname]=x[,cluster]
+
+# Find which points are inside the ellipse, and add it to the df_final
+
+df_final=data.frame()
+for (i in seq(1,cluster,by=1)){
+  data2=data[data$group==i,]
+  if(nrow(data2)>3){
+    p=ggplot(data2, aes(PC1, PC2,  shape=dataname)) +   geom_point(size=3)+
+      stat_ellipse(type=type_ellipse,level=thr_ellipse)
+    
+    # Extract components
+    build <- ggplot_build(p)$data
+    points <- build[[1]]
+    ell <- build[[2]]
+    
+    # Find which points are inside the ellipse, and add this to the data
+    dat <- data.frame(
+      in.ell = as.logical(point.in.polygon(points$x, points$y, ell$x, ell$y))
+    )
+    data2['in.ell']=dat
+    df_final=rbind(df_final,data2)
+  }else{
+    data2['in.ell']=FALSE
+    df_final=rbind(df_final,data2)
+  }
+}
 
 
-# Extract components
-build <- ggplot_build(p)$data
-points <- build[[1]]
-ell <- build[[2]]
 
-# Find which points are inside the ellipse, and add this to the data
-dat <- data.frame(
-  in.ell = as.logical(point.in.polygon(points$x, points$y, ell$x, ell$y))
-)
+ggplot(df_final, aes(PC1, PC2, color =as.factor(df_final$group), shape =as.factor(df_final$in.ell),label=name))+ geom_text() + geom_point(size=3) +
+  stat_ellipse(geom="polygon", aes(fill = as.factor(df_final$group)), 
+               
+               alpha = 0.2, 
+               
+               show.legend = TRUE, 
+               type='t',
+               
+               level = 0.99) 
 
-data['in.ell']=dat
-
-data_list_neto=c(row.names(data)[which(data$in.ell==TRUE)])
-
-p=ggplot(data, aes(PC1, PC2,  shape=dataname)) +
-  geom_point(aes(col = in.ell)) +
-  stat_ellipse(type=type_ellipse,level=thr_ellipse)+geom_text(aes(label=name),size=2)
-
-ggsave(p,filename = paste(radical,".pdf",sep=""),width = 12,height = 9)
-
+ggsave(p,filename = paste(name_test,".pdf",sep=""),width = 12,height = 9,path = radical,)
 print("end of filtering plot ACP")
+
+
+#### END ACP analysis ########################################################
+
+data_list_supp=c(row.names(df_final)[which(df_final$in.ell==FALSE)])
+data_list_neto=c(row.names(df_final)[which(df_final$in.ell==TRUE)])
+
+batCts_clear=batCts[,data_list_neto]
+batcoldata_clear=batcoldata[data_list_neto,]
+dds <-dds[,data_list_neto]
+
 
 ####end of plot ACP #####################################################
 
-if(length(data_list_neto) < samping){
+if(length(data_list_neto) <= samping){
   print("Error:number of the samping isn't enough")
-  dds <-dds[,data_list_neto]
+  data_list=c(row.names(df_final))
+  a=sample(data_list,samping)
+  dds <-dds[,a]
 }else{
-  print(paste("ramdom:number of the samping :", samping,sep = " "))
+  print(paste("ramdom:total number of the samping :", samping,sep = " "))
   a=sample(data_list_neto,samping)
   dds <- dds[,a]
 }

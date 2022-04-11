@@ -19,7 +19,7 @@ def parser():
     parser.add_argument("-pthr", "--pearson_threshold", type=float, help=" Pearson correlation threshold "
                                                                          "(default: 0.5)", default=0.5)
     parser.add_argument("-min", "--min_reads", type=int, help="minimum number of reads to consider (default: 20)", default=20)
-    parser.add_argument("--repeat_times", "-rt", type=int, help="time repear (default: 1)", default=1)
+    parser.add_argument("--repeat_times", "-rt", type=int, help="number of replications (default: 1)", default=1)
     args = parser.parse_args()
     paths_matrices = args.paths_matrices
     paths_annot = args.paths_annot
@@ -144,7 +144,7 @@ for repeat_time in range(1,repeat_times+1):
 
     for age_class, sex, organ in dico_matrices:
         dico_matrices[age_class,sex,organ]
-        dico_new_matrices[age_class,sex,organ,test]=dico_matrices[age_class,sex,organ]
+        dico_new_matrices[age_class,sex,organ,repeat_time]=dico_matrices[age_class,sex,organ]
 
     # create subfolders for each age-class, to store in an outpaths dictionary:
     for age_class, sex, organ in dico_matrices:
@@ -164,7 +164,7 @@ for repeat_time in range(1,repeat_times+1):
 segmented = {}
 nodelists = {}
 for (age_class, sex, organ,repeat_time), path_m in dico_new_matrices.items():
-    path_a = dico_annot[(age_class, sex, organ,repeat_time)]
+    path_a = dico_annot[(age_class, sex, organ)]
     radical = radicals[(age_class, sex, organ,repeat_time)]
     outpath = outpaths[(age_class, sex, organ,repeat_time)]
     command = f"Rscript GCNScript3_JT.r --in_mat={path_m} --annot={path_a} --out={radical} --dir={outpath} --min={min_reads} --thr={thr} --pthr={pthr}"
