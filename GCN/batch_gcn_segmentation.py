@@ -1,6 +1,8 @@
 import argparse
 import subprocess as sp
 import os
+import time
+import datetime
 
 def parser():
     """
@@ -132,11 +134,13 @@ dico_new_matrices={}
 for repeat_time in range(1,repeat_times+1):
     # hard-coded range of Pearson thresholds to segment the large GCN
     repeat_time=str(repeat_time)
-    thrs = ["0.8", "0.85", "0.9", "0.95"]
+    thrs = ["0.9", "0.95"]
 
     # create the output directory
     make_output_directory(outdir)
-
+    
+    t = time.time()
+    print(t)
     # store paths to matrices and annotations in dictionaries with age-classe, sex, organ as keys
     dico_matrices = read_dictionary(paths_matrices, sep="\t")
     dico_annot = read_dictionary(paths_annot, sep="\t")
