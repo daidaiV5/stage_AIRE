@@ -1,14 +1,12 @@
 import argparse
 import os
 import sys
-import random as rd
-from multiprocessing import Pool
-import pickle as pkl
 import networkx as nx
 import numpy as np
-import matplotlib.cm as cm
 import pandas as pd
 import statistics
+import time
+import datetime
 
 def read_layer(file_layer):
     """
@@ -180,7 +178,9 @@ class MultiLayer:
 
 def args_check():
     parser = argparse.ArgumentParser(description= """
-    This script will use for 
+    This script will use for combination
+    eg:
+   
  
      """
     ,formatter_class = argparse.RawTextHelpFormatter)
@@ -194,9 +194,14 @@ def args_check():
             
 def main():
     parameters = args_check()
+    print('------begin----------')
+    stamp = int(time.time())
+    print(datetime.datetime.fromtimestamp(stamp))
     list_layers, array_class = read_input_file(parameters.input_file,parameters.name_of_file)
     MultiLayer(list_layers, array_class, parameters.threshold,parameters.outdir)
     print('------success----------')
+    stamp = int(time.time())
+    print(datetime.datetime.fromtimestamp(stamp))
 
 
 if __name__ == "__main__":
