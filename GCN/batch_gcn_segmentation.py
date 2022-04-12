@@ -142,8 +142,8 @@ for repeat_time in range(1,repeat_times+1):
     t = time.time()
     print(t)
     # store paths to matrices and annotations in dictionaries with age-classe, sex, organ as keys
-    dico_matrices = read_dictionary(paths_matrices, sep="\t")
-    dico_annot = read_dictionary(paths_annot, sep="\t")
+    dico_matrices = read_dictionary(paths_matrices, sep=",")
+    dico_annot = read_dictionary(paths_annot, sep=",")
     print(dico_matrices)
 
     for age_class, sex, organ in dico_matrices:
