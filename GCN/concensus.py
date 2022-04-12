@@ -85,7 +85,10 @@ def count_pearson(list_pearson):
     for i in list_pearson:
         if i>0:
             list_new_pearson.append(i)
-    return statistics.mean(list_new_pearson)
+    if len(list_new_pearso)==0:
+        return 0
+    else:
+        return statistics.mean(list_new_pearson)
 
 def create_directory(outdir):
     if not os.path.exists(outdir):

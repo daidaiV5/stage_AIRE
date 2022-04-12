@@ -1,8 +1,8 @@
-Liver	male	class4	dataset_test/liver_mouse/annotation_liver/annotation_liver_class4_male.csv
-Liver	male	class3	dataset_test/liver_mouse/annotation_liver/annotation_liver_class3_male.csv
-Liver	male	class2	dataset_test/liver_mouse/annotation_liver/annotation_liver_class2_male.csv
-Liver	male	class1	dataset_test/liver_mouse/annotation_liver/annotation_liver_class1_male.csv
-Liver	Female	class4	dataset_test/liver_mouse/annotation_liver/annotation_liver_class4_Female.csv
-Liver	Female 	class3	dataset_test/liver_mouse/annotation_liver/annotation_liver_class3_Female.csv
-Liver	Female	class2	dataset_test/liver_mouse/annotation_liver/annotation_liver_class2_Female.csv
-Liver	Female	class1	dataset_test/liver_mouse/annotation_liver/annotation_liver_class1_Female.csv
+Liver,male,class4,dataset_test/liver_mouse/annotation_liver/annotation_liver_class4_male.csv
+Liver,male,class3,dataset_test/liver_mouse/annotation_liver/annotation_liver_class3_male.csv
+Liver,male,class2,dataset_test/liver_mouse/annotation_liver/annotation_liver_class2_male.csv
+Liver,male,class1,dataset_test/liver_mouse/annotation_liver/annotation_liver_class1_male.csv
+Liver,Female,class4,dataset_test/liver_mouse/annotation_liver/annotation_liver_class4_Female.csv
+Liver,Female,class3,dataset_test/liver_mouse/annotation_liver/annotation_liver_class3_Female.csv
+Liver,Female,class2,dataset_test/liver_mouse/annotation_liver/annotation_liver_class2_Female.csv
+Liver,Female,class1,dataset_test/liver_mouse/annotation_liver/annotation_liver_class1_Female.csv
