@@ -139,8 +139,7 @@ for repeat_time in range(1,repeat_times+1):
     # create the output directory
     make_output_directory(outdir)
     
-    t = time.time()
-    print(t)
+
     # store paths to matrices and annotations in dictionaries with age-classe, sex, organ as keys
     dico_matrices = read_dictionary(paths_matrices, sep=",")
     dico_annot = read_dictionary(paths_annot, sep=",")
@@ -168,6 +167,8 @@ for repeat_time in range(1,repeat_times+1):
 segmented = {}
 nodelists = {}
 for (age_class, sex, organ,repeat_time), path_m in dico_new_matrices.items():
+    stamp = int(time.time())
+    print(datetime.datetime.fromtimestamp(stamp))
     path_a = dico_annot[(age_class, sex, organ)]
     radical = radicals[(age_class, sex, organ,repeat_time)]
     outpath = outpaths[(age_class, sex, organ,repeat_time)]
