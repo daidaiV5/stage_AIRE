@@ -85,7 +85,7 @@ def count_pearson(list_pearson):
     for i in list_pearson:
         if i>0:
             list_new_pearson.append(i)
-    if len(list_new_pearso)==0:
+    if len(list_new_pearson)==0:
         return 0
     else:
         return statistics.mean(list_new_pearson)
