@@ -1,5 +1,13 @@
 # GCN
-## 1. : 
+## 1. used of batch_gcn_segmentation.py
+
+	python batch_gcn_segmentation.py -pm paths_matrices_sub_20.csv -pa paths_annot_sub_20.csv -o echantionage -rt 10
+
+modification: add parameter repeat_time(defaut=1)
+
+so the path
+
+
 
 ### package : 
 #### pysradb :
