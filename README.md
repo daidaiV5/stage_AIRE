@@ -1,3 +1,7 @@
+# research_dataset
+
+selection_data.ipynb : research in mouse_transcript_v11.h5 and research in GEO dataset
+
 # GCN
 ## 1. used of batch_gcn_segmentation.py
 
