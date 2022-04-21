@@ -166,15 +166,15 @@ if (!require("WGCNA")){
 if (!require("sp")){
   BiocManager::install("sp", dependencies = TRUE) 
 }
-if (!require("vegan")){
-  BiocManager::install("vegan", dependencies = TRUE) 
-}
+#if (!require("vegan")){
+#  BiocManager::install("vegan", dependencies = TRUE) 
+#}
 
 
 library("DESeq2")
 library("ggplot2")
 library("sp")
-library('vegan')
+#library('vegan')
   
 ##### LOAD DATA #######################################################
 batCts <- as.matrix(read.csv(file=paste(initFolder, file_mat, sep = ""),
@@ -215,6 +215,10 @@ dds <- dds[keep,]
 ##### END LOAD DATA #####################################################
 
 ##### COMPUTE NORMALISATION #############################################
+data_list=c(row.names(batcoldata))
+a=sample(data_list,samping)
+dds=dds[,a]
+
 vst <- vst(dds, blind=FALSE)
 
 #rld <- rlog(dds, blind=FALSE)								# alt

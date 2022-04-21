@@ -182,12 +182,15 @@ class MultiLayer:
 def args_check():
     parser = argparse.ArgumentParser(description= """
     This script will use for combination
+    
     eg:
+    
+    python concensus.py --input_file /home/storage_1/yuping/GCN/Liver2/ --name_of_file filtered_all_cor_0.8.csv --threshold 0.7 --outdir /home/storage_1/yuping/compute_GCN/result_concensus3/
    
  
      """
     ,formatter_class = argparse.RawTextHelpFormatter)
-    parser.add_argument("--input_file", type=str, help="path folder to all the file we want to be concensus")
+    parser.add_argument("--input_file", type=str, help="path folder")
     parser.add_argument("--name_of_file", type=str, help="file name '.csv'")
     parser.add_argument("--threshold", type=float,default=0.9)
     parser.add_argument("--outdir", type=str,)
@@ -198,10 +201,24 @@ def args_check():
 def main():
     parameters = args_check()
     print('------begin----------')
-    stamp = int(time.time())
-    print(datetime.datetime.fromtimestamp(stamp))
-    list_layers, array_class = read_input_file(parameters.input_file,parameters.name_of_file)
-    MultiLayer(list_layers, array_class, parameters.threshold,parameters.outdir)
+    input_file=parameters.input_file
+    for i in os.listdir(input_file):
+        liste_of_class_name=f'{input_file}{i}/'
+        print(liste_of_class_name)
+        for j in os.listdir(liste_of_class_name):
+            liste_of_sex_name=f'{input_file}{i}/{j}/'
+            for h in os.listdir(liste_of_sex_name):
+                stamp = int(time.time())
+                print(datetime.datetime.fromtimestamp(stamp))
+                liste_of_final_name=f'{input_file}{i}/{j}/{h}'
+                name=parameters.name_of_file
+                h=h.lower()
+                name_of_file=f'{h}_{i}_{j}_{name}'
+                print(f'{h}_{i}_{j}_{name}')
+                list_layers, array_class = read_input_file(liste_of_final_name,name_of_file)
+                liste_outdir=f'{parameters.outdir}/{i}_{j}_{parameters.threshold}'
+                MultiLayer(list_layers, array_class, parameters.threshold,liste_outdir)
+                print(liste_of_final_name)
     print('------success----------')
     stamp = int(time.time())
     print(datetime.datetime.fromtimestamp(stamp))

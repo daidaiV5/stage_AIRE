@@ -134,7 +134,7 @@ dico_new_matrices={}
 for repeat_time in range(1,repeat_times+1):
     # hard-coded range of Pearson thresholds to segment the large GCN
     repeat_time=str(repeat_time)
-    thrs = ["0.9", "0.95"]
+    thrs = ["0.8","0.85","0.9", "0.95"]
 
     # create the output directory
     make_output_directory(outdir)
