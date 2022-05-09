@@ -3,6 +3,7 @@ import subprocess as sp
 import os
 import time
 import datetime
+from itertools import combinations
 
 def parser():
     """
@@ -22,6 +23,9 @@ def parser():
                                                                          "(default: 0.5)", default=0.5)
     parser.add_argument("-min", "--min_reads", type=int, help="minimum number of reads to consider (default: 20)", default=20)
     parser.add_argument("--repeat_times", "-rt", type=int, help="number of replications (default: 1)", default=1)
+    parser.add_argument("--number_of_each_GCN","-nG",type=int,help="number of sample for each GCN(default : 10)", default=10)
+    parser.add_argument("--number_of_repeat_diffrente","-nd",type=int,help="number maximun common between each repeat(default : 2)",default=2)    
+    
     args = parser.parse_args()
     paths_matrices = args.paths_matrices
     paths_annot = args.paths_annot
@@ -32,6 +36,54 @@ def parser():
     repeat_times=args.repeat_times
     return paths_matrices, paths_annot, outdir, thr, pthr, min_reads,repeat_times
 
+
+def combine(temp_list, n):
+    ''' 
+    combine : get all possible combinations of a list’s elements
+    
+    temp_list: list for which we will do the random
+    n: number of random
+    
+    '''
+    temp_list2 = []
+    for c in combinations(temp_list, n):#Return n length subsequences of elements from the input iterable.
+        temp_list2.append(c)
+    return temp_list2
+
+def choose_and_remove( items ):
+    ''' 
+    
+    '''
+    index = random.randrange( len(items) )
+    
+    return items.pop(index)
+
+
+def maximun_commen(random_result,list_final,nomber_common_maximun):
+    list_commen=[]
+    set2 = set(random_result)
+    for j in list_final:
+        set1 = set(j)
+        list_commen.append(len(set1&set2))
+    print(list_commen)
+    if [i for i in list_commen if i <= nomber_common_maximun]: 
+        return True
+    else:
+        return False
+
+def list_to_file(liste_final,path):
+    data=pd.DataFrame(liste_final)
+    data.to_csv(path,sep=',',index=0,header=0)
+    
+    
+def compture_sample(annotation):
+    '''
+    to know how many sample in the matrice 
+    
+    '''
+    df=pd.read_csv(annotation)
+    return len(df)    
+    
 
 def file_to_list(path):
     """
@@ -127,10 +179,14 @@ def write_segmented(path_to_gcn, path_to_segmented, path_to_nodelist, absolute=T
 
 
 # user input
-paths_matrices, paths_annot, outdir, thr, pthr, min_reads,repeat_times = parser()
+paths_matrices, paths_annot, outdir, thr, pthr, min_reads,repeat_times,number_of_each_GCN,number_of_repeat_diffrente = parser()
 outpaths = {}
 radicals = {}
 dico_new_matrices={}
+
+    
+
+
 for repeat_time in range(1,repeat_times+1):
     # hard-coded range of Pearson thresholds to segment the large GCN
     repeat_time=str(repeat_time)
@@ -166,13 +222,34 @@ for repeat_time in range(1,repeat_times+1):
 
 segmented = {}
 nodelists = {}
-for (age_class, sex, organ,repeat_time), path_m in dico_new_matrices.items():
+
+for (age_class, sex, organ), path_m in dico_matrices.items():
     stamp = int(time.time())
     print(datetime.datetime.fromtimestamp(stamp))
+    
+    number_sample=compture_sample(path_a)
+    list1 = list(range(1,number_sample+1,1))
+    end_list = [] #end_list is all possible combinations 
+    end_list.extend(combine(list1, number_of_each_GCN))
+
+    list_final=[] # list_final for 
+    list_final.append(choose_and_remove(end_list))
+    i=0
+    while(i<repeat_times-1):
+        random_result=choose_and_remove(end_list)
+        x=maximun_commen(random_result,list_final,2)
+        if(x==True):
+            list_final.append(random_result)
+        i=i+1
+    outpath = outpaths[(age_class, sex, organ)]
+    path_list=f'{outpath}list_of_random.txt'
+    list_to_file(list_final,path_list)
+    
     path_a = dico_annot[(age_class, sex, organ)]
-    radical = radicals[(age_class, sex, organ,repeat_time)]
-    outpath = outpaths[(age_class, sex, organ,repeat_time)]
-    command = f"Rscript GCNScript4_JT.r --in_mat={path_m} --annot={path_a} --out={radical} --dir={outpath} --min={min_reads} --thr={thr} --pthr={pthr} --repeats={repeat_time}"
+    radical = radicals[(age_class, sex, organ)]
+    
+    command = f"Rscript GCNScript4_JT.r --in_mat={path_m} --annot={path_a} --out={radical} --dir={outpath} --min={min_reads} --thr={thr} --pthr={pthr} --repeats={repeat_time} --random_result={path_list}"
+    
     execute(command)
 
 # segment the resulting GCN, extract node lists, and  keep track of paths in a dictionary
@@ -204,7 +281,7 @@ path_file = f"./path_to_edgefiles.csv"
 make_output_file(path_file)
 with open(path_file, "a") as f:
     f.write(f"age_class\tsex\torgan\tPearson_thr\tcorrelations\tpath\n")
-    for (age_class, sex, organ,repeat_time ), dir in outpaths.items():
+    for (age_class, sex, organ,repeat_time), dir in outpaths.items():
         radical = radicals[(age_class, sex, organ,repeat_time)]
         filepath = os.path.join(dir, f"{radical}_gcn_edges_cor_{pthr}.csv")
         f.write(f"{age_class}\t{sex}\t{organ}\t{pthr}\tall\t{filepath}\n")
@@ -212,16 +289,16 @@ with open(path_file, "a") as f:
         for cor, path in paths.items():
             f.write(f"{age_class}\t{sex}\t{organ}\t{segthr}\t{cor}\t{path}\n")
 
-path_file = f"./path_to_nodelists.csv"
-make_output_file(path_file)
-with open(path_file, "a") as f:
-    f.write(f"age_class\tsex\torgan\tPearson_thr\tcorrelations\tpath\n")
-    for (age_class, sex, organ,repeat_time), dir in outpaths.items():
-        radical = radicals[(age_class, sex, organ,repeat_time)]
-        filepath = os.path.join(dir, f"{radical}_gcn_nodes_cor_{pthr}.txt")
-        f.write(f"{age_class}\t{sex}\t{organ}\t{pthr}\tall\t{filepath}\n")
-    for (age_class, sex, organ,repeat_time,segthr), paths in nodelists.items():
-        for cor, path in paths.items():
-            f.write(f"{age_class}\t{sex}\t{organ}\t{segthr}\t{cor}\t{path}\n")
+# path_file = f"./path_to_nodelists.csv"
+# make_output_file(path_file)
+# with open(path_file, "a") as f:
+#     f.write(f"age_class\tsex\torgan\tPearson_thr\tcorrelations\tpath\n")
+#     for (age_class, sex, organ,repeat_time), dir in outpaths.items():
+#         radical = radicals[(age_class, sex, organ,repeat_time)]
+#         filepath = os.path.join(dir, f"{radical}_gcn_nodes_cor_{pthr}.txt")
+#         f.write(f"{age_class}\t{sex}\t{organ}\t{pthr}\tall\t{filepath}\n")
+#     for (age_class, sex, organ,repeat_time,segthr), paths in nodelists.items():
+#         for cor, path in paths.items():
+#             f.write(f"{age_class}\t{sex}\t{organ}\t{segthr}\t{cor}\t{path}\n")
 
 

@@ -3,7 +3,7 @@
 ####
 # Working version by E. Corel
 # Further adapted by J. Teulière
-# Last modified on 03/11/2021
+# Last modified by yuping on 97/05/2021
 ####
 
 Args <- commandArgs(TRUE)
@@ -30,10 +30,8 @@ if("--help" %in% Args) {
       --thr=threshold		               - 1-Pval Student threshold for significqnt pearson correlations (default 0.95)
       --pthr=pthreshold                - Pearson correlation threshold above which to keep edges (default 0.5)
       --min=minimum_reads              - Minimum number of reads to determine correlations (default 20)
+      --random_result                  -   
       --repeats
-      --type_ellipse                   - The type of ellipse. The default t assumes a multivariate t-distribution, and norm assumes a multivariate normal distribution.(default t)
-      --thr_ellipse                    - threshold for the ellipse  (default 0.95)
-      --samping                        - number of the samping
       --help                           - print this text
  
       Example:
@@ -162,14 +160,14 @@ initFolder = "./"
 #######################################################################
 # 0) Load libraries 
 #######################################################################
-if (!requireNamespace("BiocManager", quietly = TRUE) || !require("DESeq2")){
-    install.packages("BiocManager", dependencies = TRUE)
-    BiocManager::install("DESeq2", dependencies = TRUE)
-   }
-if (!require("ggplot2")) {
-   install.packages("ggplot2", dependencies = TRUE)
-   library("ggplot2")
-   }
+# if (!requireNamespace("BiocManager", quietly = TRUE) || !require("DESeq2")){
+#     install.packages("BiocManager", dependencies = TRUE)
+#     BiocManager::install("DESeq2", dependencies = TRUE)
+#    }
+# if (!require("ggplot2")) {
+#    install.packages("ggplot2", dependencies = TRUE)
+#    library("ggplot2")
+#    }
 if (!require("WGCNA")){
     BiocManager::install("WGCNA", dependencies = TRUE) 
 }
@@ -181,13 +179,12 @@ if (!require("WGCNA")){
 #}
 
 
-library("DESeq2")
+#library("DESeq2")
 #library("ggplot2")
-#library("sp")
-# library('vegan')
+
   
 ##### LOAD DATA #######################################################
-vst <- as.matrix(read.csv(file=paste(initFolder, file_mat, sep = ""),
+vst2 <- as.matrix(read.csv(file=paste(initFolder, file_mat, sep = ""),
                                header=TRUE, sep=",", row.names = 1)) ## To do: parameterize row.names -- h-coded to "gene_id" ***
 
 
@@ -242,21 +239,37 @@ allowWGCNAThreads(nThreads=20)
 
 # vst <- assay(vst)
 
-print(repeat_time)
-print(as.integer(repeat_time))
+repeat_time=as.integer(repeat_time)
 
-vst=vst[,-as.integer(repeat_time)]
+df=read.csv("/Users/daiyuping/Desktop/gitstage/stage_AIRE/samping/test.txt",sep = ',',header = FALSE)
 
-vst <- t(vst)
-file = paste(radical,"_vst.txt", sep = "")						# To do :  parameterize output name ***
-write.table(vst, paste(folder, file, sep = ""))
+for (i in 1:repeat_time) {
+  x=c(unlist(df[i,]))
+  vst=vst2[,x]
+  
+  i=as.character(i)
+  vst <- t(vst)
+  file = paste(radical,"_vst.txt", sep = "")	
+  write.table(vst, paste(folder,i,"/",file, sep = ""))
+  
+  cor_pval <- corAndPvalue(vst,alternative = "two.sided", method = "pearson", nThreads = 24)
+  
+  file = paste(radical,"_gcn_edges_cor_",pthr,".csv", sep = "")					# To do :  parameterize output name ***
+  exportNetworkToCytoscape(cor_pval$cor, 
+                           edgeFile = paste(folder, file, sep = ""),
+                           threshold = pthr)
+  cor_pval <- NULL
+  #pvalue_mat <- NULL
+  gc()
+  
+}
+
 
 ##### END COMPUTE NORMALISATION #########################################
   
 ##### PEARSON CORRELATIONS NETWORK AND PVALUES ##########################
 # STEP 1 : compute Pearson correlation and pvalues ######################
 
-cor_pval <- corAndPvalue(vst,alternative = "two.sided", method = "pearson", nThreads = 24)
   
 #threshold = 0.8									# alt Section : unused
 #cor_t <- cor_pval$cor[(abs(cor_pval$cor[]) > threshold)]				#
@@ -268,10 +281,10 @@ cor_pval <- corAndPvalue(vst,alternative = "two.sided", method = "pearson", nThr
 
 # Substep a : Export edges # threshold modified #########################
 										# H-Coded parameter: thr ***
-file = paste(radical,"_gcn_edges_cor_",pthr,".csv", sep = "")					# To do :  parameterize output name ***
-exportNetworkToCytoscape(cor_pval$cor, 
-                           edgeFile = paste(folder, file, sep = ""),
-                           threshold = pthr)
+# file = paste(radical,"_gcn_edges_cor_",pthr,".csv", sep = "")					# To do :  parameterize output name ***
+# exportNetworkToCytoscape(cor_pval$cor, 
+#                            edgeFile = paste(folder, file, sep = ""),
+#                            threshold = pthr)
 
 # Substep b : Export nodes #############################################
 # file = paste(radical,"_gcn_nodes_cor_",pthr,".txt", sep = "")					# To do :  parameterize output name ***
@@ -290,9 +303,9 @@ exportNetworkToCytoscape(cor_pval$cor,
 #exportNetworkToCytoscape(pvalue_mat, 
 #                           edgeFile = paste(folder, file, sep = ""), 
 #                           threshold = thr)						
-cor_pval <- NULL
-#pvalue_mat <- NULL
-gc()
+# cor_pval <- NULL
+# pvalue_mat <- NULL
+# gc()
 
 ##### END PEARSON CORRELATIONS NETWORK AND PVALUES #####################
   
