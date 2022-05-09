@@ -72,6 +72,12 @@ if(is.null(argsL$repeats)) {
 } else {repeat_time<- argsL$repeats}
 
 
+if(is.null(argsL$random_result )) {
+print("no input ")
+stop("--random_result required")
+  } else {random_result <- argsL$random_result}
+
+
 # Data default ANNOTATION
 #
 # if(is.null(argsL$annot)) {
@@ -110,20 +116,20 @@ if(is.null(argsL$thr)) {
 thr <- as.double(thr)
 
 #####for PCA : type of ellipse 
-if(is.null(argsL$type_ellipse)) {
-  print("type_ellipse:t")
-  type_ellipse <- 't'
-} else {
-  type_ellipse <- argsL$type_ellipse
-  print(type_ellipse)
-  }
+# if(is.null(argsL$type_ellipse)) {
+#   print("type_ellipse:t")
+#   type_ellipse <- 't'
+# } else {
+#   type_ellipse <- argsL$type_ellipse
+#   print(type_ellipse)
+#   }
 
 
-if(is.null(argsL$thr_ellipse)) {
-  print("threshold default value : 0.95")
-  thr_ellipse <- 0.95
-} else {thr_ellipse <- argsL$thr_ellipse}
-thr_ellipse <- as.double(thr_ellipse)
+# if(is.null(argsL$thr_ellipse)) {
+#   print("threshold default value : 0.95")
+#   thr_ellipse <- 0.95
+# } else {thr_ellipse <- argsL$thr_ellipse}
+# thr_ellipse <- as.double(thr_ellipse)
 
 
 ######
@@ -146,12 +152,12 @@ if(is.null(argsL$min)) {
 # make sure it's an integer
 min <- round(as.double(min))
 
-if(is.null(argsL$samping)) {
-  print("number of samping: 15") 
-  samping <- 15
-} else {samping <- argsL$samping}
+# if(is.null(argsL$samping)) {
+#   print("number of samping: 15") 
+#   samping <- 5
+# } else {samping <- argsL$samping}
 # make sure it's an integer
-samping <- round(as.double(samping))
+# samping <- round(as.double(samping))
 
 ############# END INPUT STEP
 
@@ -241,7 +247,7 @@ allowWGCNAThreads(nThreads=20)
 
 repeat_time=as.integer(repeat_time)
 
-df=read.csv("/Users/daiyuping/Desktop/gitstage/stage_AIRE/samping/test.txt",sep = ',',header = FALSE)
+df=read.csv(random_result,sep = ',',header = FALSE)
 
 for (i in 1:repeat_time) {
   x=c(unlist(df[i,]))
@@ -249,8 +255,9 @@ for (i in 1:repeat_time) {
   
   i=as.character(i)
   vst <- t(vst)
+  dir.create(paste(folder,"/",i,"/",sep = ""))
   file = paste(radical,"_vst.txt", sep = "")	
-  write.table(vst, paste(folder,i,"/",file, sep = ""))
+  write.table(vst, paste(folder,"/",i,"/",file, sep = ""))
   
   cor_pval <- corAndPvalue(vst,alternative = "two.sided", method = "pearson", nThreads = 24)
   

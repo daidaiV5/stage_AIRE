@@ -4,6 +4,9 @@ import os
 import time
 import datetime
 from itertools import combinations
+import pandas as pd
+import random
+from random import randrange
 
 def parser():
     """
@@ -22,8 +25,8 @@ def parser():
     parser.add_argument("-pthr", "--pearson_threshold", type=float, help=" Pearson correlation threshold "
                                                                          "(default: 0.5)", default=0.5)
     parser.add_argument("-min", "--min_reads", type=int, help="minimum number of reads to consider (default: 20)", default=20)
-    parser.add_argument("--repeat_times", "-rt", type=int, help="number of replications (default: 1)", default=1)
-    parser.add_argument("--number_of_each_GCN","-nG",type=int,help="number of sample for each GCN(default : 10)", default=10)
+    parser.add_argument("--repeat_times", "-rt", type=int, help="number of replications (default: 1)", default=10)
+    parser.add_argument("--number_of_each_GCN","-nG",type=int,help="number of sample for each GCN(default : 5)", default=5)
     parser.add_argument("--number_of_repeat_diffrente","-nd",type=int,help="number maximun common between each repeat(default : 2)",default=2)    
     
     args = parser.parse_args()
@@ -34,7 +37,9 @@ def parser():
     pthr = args.pearson_threshold
     min_reads = args.min_reads
     repeat_times=args.repeat_times
-    return paths_matrices, paths_annot, outdir, thr, pthr, min_reads,repeat_times
+    number_of_each_GCN=args.number_of_each_GCN
+    number_of_repeat_diffrente=args.number_of_repeat_diffrente
+    return paths_matrices, paths_annot, outdir, thr, pthr, min_reads,repeat_times,number_of_each_GCN,number_of_repeat_diffrente
 
 
 def combine(temp_list, n):
@@ -199,7 +204,6 @@ for repeat_time in range(1,repeat_times+1):
     # store paths to matrices and annotations in dictionaries with age-classe, sex, organ as keys
     dico_matrices = read_dictionary(paths_matrices, sep=",")
     dico_annot = read_dictionary(paths_annot, sep=",")
-    print(dico_matrices)
 
     for age_class, sex, organ in dico_matrices:
         dico_matrices[age_class,sex,organ]
@@ -207,15 +211,15 @@ for repeat_time in range(1,repeat_times+1):
 
     # create subfolders for each age-class, to store in an outpaths dictionary:
     for age_class, sex, organ in dico_matrices:
-        path = os.path.join(outdir, organ, sex, age_class,repeat_time)
+        path = os.path.join(outdir, organ, sex, age_class)
         make_output_directory(path)
-        outpaths[(age_class, sex, organ,repeat_time)] = path
-        
+        outpaths[(age_class, sex, organ)] = path
+
 
     # define radicals for file names in a third dictionary
     for (age_class, sex, organ), path in dico_matrices.items():
         radical = path.split("/")[-1].split(".")[0]
-        radicals[(age_class, sex, organ,repeat_time)] = radical
+        radicals[(age_class, sex, organ)] = radical
 
 
 # use R script to calculate GCNs
@@ -226,7 +230,7 @@ nodelists = {}
 for (age_class, sex, organ), path_m in dico_matrices.items():
     stamp = int(time.time())
     print(datetime.datetime.fromtimestamp(stamp))
-    
+    path_a = dico_annot[(age_class, sex, organ)]
     number_sample=compture_sample(path_a)
     list1 = list(range(1,number_sample+1,1))
     end_list = [] #end_list is all possible combinations 
@@ -237,23 +241,26 @@ for (age_class, sex, organ), path_m in dico_matrices.items():
     i=0
     while(i<repeat_times-1):
         random_result=choose_and_remove(end_list)
-        x=maximun_commen(random_result,list_final,2)
+        x=maximun_commen(random_result,list_final,number_of_repeat_diffrente)
         if(x==True):
             list_final.append(random_result)
-        i=i+1
+            i=i+1
+        
     outpath = outpaths[(age_class, sex, organ)]
-    path_list=f'{outpath}list_of_random.txt'
+    print(outpath)
+    path_list=f'{outpath}/list_of_random.txt'
     list_to_file(list_final,path_list)
     
-    path_a = dico_annot[(age_class, sex, organ)]
+
     radical = radicals[(age_class, sex, organ)]
     
-    command = f"Rscript GCNScript4_JT.r --in_mat={path_m} --annot={path_a} --out={radical} --dir={outpath} --min={min_reads} --thr={thr} --pthr={pthr} --repeats={repeat_time} --random_result={path_list}"
+    command = f"Rscript GCNScript4_JT.r --in_mat={path_m} --out={radical} --dir={outpath} --min={min_reads} --thr={thr} --pthr={pthr} --repeats={repeat_time} --random_result={path_list}"
     
     execute(command)
 
 # segment the resulting GCN, extract node lists, and  keep track of paths in a dictionary
 
+    
     for segthr in thrs:
         segthr = float(segthr)
         print(f"Segmenting GCN at Pearson >= {segthr}")
