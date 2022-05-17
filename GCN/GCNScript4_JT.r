@@ -255,15 +255,21 @@ for (i in 1:repeat_time) {
   
   i=as.character(i)
   vst <- t(vst)
-  dir.create(paste(folder,"/",i,"/",sep = ""))
+  dir.create(paste(folder,i,"/",sep = ""))
   file = paste(radical,"_vst.txt", sep = "")	
   write.table(vst, paste(folder,"/",i,"/",file, sep = ""))
   
-  cor_pval <- corAndPvalue(vst,alternative = "two.sided", method = "pearson", nThreads = 24)
+  print('begin of cor')
+  #cor_pval <- corAndPvalue(vst,alternative = "two.sided", method = "pearson", nThreads = 24)
+  cor_pval <- cor(vst, method = "pearson", nThreads = 24)
+  print('finish of cor')
   
   file = paste(radical,"_gcn_edges_cor_",pthr,".csv", sep = "")					# To do :  parameterize output name ***
-  exportNetworkToCytoscape(cor_pval$cor, 
-                           edgeFile = paste(folder, file, sep = ""),
+  # exportNetworkToCytoscape(cor_pval$cor, 
+  #                          edgeFile = paste(folder,"/",i,"/",file, sep = ""),
+  #                          threshold = pthr)
+  exportNetworkToCytoscape(cor_pval,
+                           edgeFile = paste(folder,"/",i,"/",file, sep = ""),
                            threshold = pthr)
   cor_pval <- NULL
   #pvalue_mat <- NULL

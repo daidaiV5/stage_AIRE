@@ -163,18 +163,18 @@ if (!require("ggplot2")) {
 if (!require("WGCNA")){
     BiocManager::install("WGCNA", dependencies = TRUE) 
 }
-if (!require("sp")){
-  BiocManager::install("sp", dependencies = TRUE) 
-}
+# if (!require("sp")){
+#   BiocManager::install("sp", dependencies = TRUE) 
+# }
 #if (!require("vegan")){
 #  BiocManager::install("vegan", dependencies = TRUE) 
 #}
 
 
 library("DESeq2")
-library("ggplot2")
-library("sp")
-#library('vegan')
+#library("ggplot2")
+#library("sp")
+# library('vegan')
   
 ##### LOAD DATA #######################################################
 batCts <- as.matrix(read.csv(file=paste(initFolder, file_mat, sep = ""),
@@ -200,8 +200,6 @@ colnames(batCts) <- lapply(colnames(batCts) , function(x){gsub("\\.", "-", x)}) 
 
 #head(batCts)
 all(rownames(batcoldata) == colnames(batCts))
-dataname = "group"
-batcoldata['group']='A'
 dds <- DESeqDataSetFromMatrix(countData = batCts,
                                 colData = batcoldata,
                                 design = ~ 1)

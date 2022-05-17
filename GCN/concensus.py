@@ -28,7 +28,7 @@ def read_layer(file_layer):
 
 
 
-def read_input_file(input_file,name_of_file):
+def read_input_file(input_file,name_of_file,repetitions):
     """
     a fonction for read all file for combination(consensus)
     
@@ -46,10 +46,11 @@ def read_input_file(input_file,name_of_file):
     list_path = []
     list_age_class = []
     files = os.listdir(input_file)
-    for file in files:
-        input_file2=f'{input_file}/{file}/{name_of_file}'
+    for i in range(1,repetitions+1):
+        i=str(i)
+        input_file2=f'{input_file}/{i}/{name_of_file}'
         list_path.append(input_file2)
-        list_age_class.append(file)
+        list_age_class.append(i)
     list_layers = []
     for path in list_path:
         list_layers.append(read_layer(path))
@@ -170,12 +171,12 @@ class MultiLayer:
                 mean_pearson=str(count_pearson(list(self.multilayer[node1][node2]["pearson"])))
                 line = f'{node1},{node2},{mean_pearson},{layers},{self.multilayer[node1][node2]["ratio"]}\n'
                 outfilecsv.write(line.replace(" ", ""))
-        with open(os.path.join(subdir, "multilayer_nodes.csv"), "w") as outfilecsv:
-            line=f'NodeName\n'
-            outfilecsv.write(line)
-            for node in self.multilayer.nodes:
-                line=f'{node}\n'
-                outfilecsv.write(line.replace(" ", ""))
+#         with open(os.path.join(subdir, "multilayer_nodes.csv"), "w") as outfilecsv:
+#             line=f'NodeName\n'
+#             outfilecsv.write(line)
+#             for node in self.multilayer.nodes:
+#                 line=f'{node}\n'
+#                 outfilecsv.write(line.replace(" ", ""))
             
 
 
@@ -202,6 +203,7 @@ def args_check():
     parser.add_argument("--input_file", type=str, help="path folder")
     parser.add_argument("--name_of_file", type=str, help="file name 'filtered_all_cor_0.8.csv'")
     parser.add_argument("--threshold", type=float,default=0.9)
+    parser.add_argument("--repetition", type=float,default=20)
     parser.add_argument("--outdir", type=str)
     parameters = parser.parse_args()
     return parameters                
@@ -222,9 +224,11 @@ def main():
                 liste_of_final_name=f'{input_file}{i}/{j}/{h}'
                 name=parameters.name_of_file
                 h=h.lower()
+                j=j.capitalize()
                 name_of_file=f'{h}_{i}_{j}_{name}'
                 print(f'{h}_{i}_{j}_{name}')
-                list_layers, array_class = read_input_file(liste_of_final_name,name_of_file)
+                print('begin""')
+                list_layers, array_class = read_input_file(liste_of_final_name,name_of_file,parameters.repetition)
                 liste_outdir=f'{parameters.outdir}/{i}_{j}_{parameters.threshold}'
                 MultiLayer(list_layers, array_class, parameters.threshold,liste_outdir)
                 print(liste_of_final_name)
