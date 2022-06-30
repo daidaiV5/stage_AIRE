@@ -47,7 +47,11 @@ selection_data.ipynb : research in mouse_transcript_v11.h5 and research in GEO d
   --normal NORMAL, -norm NORMAL
                         normalize with deseq or not (default = 'True')
 
+#### Description of datatest:
 
+dataset_test/paths_matrices_blood.csv : example for the path file
+
+dataset_test/matrice/: two matrice used for test (only 40 gene in the matrice)
 
 #### Desciption of script:
 
