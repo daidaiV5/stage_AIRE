@@ -3,42 +3,70 @@
 selection_data.ipynb : research in mouse_transcript_v11.h5 and research in GEO dataset
 
 # GCN
-## 1. used of batch_gcn_segmentation.py
+## 1. used of pipeline_gcn.py
+#### Script will calculate GCNs for provided matrices paths and segment the GCNs at provided thresholds.concensus of the random result
 
-	python batch_gcn_segmentation.py -pm paths_matrices_sub_20.csv -pa paths_annot_sub_20.csv -o echantionage -rt 10
 
-modification: 
+	usage: pipeline_gcn.py [-h] [-pm PATHS_MATRICES] [-o OUTPUT_DIRECTORY] [-pthr PEARSON_THRESHOLD]
+                       [--repeat_times REPEAT_TIMES] [--number_of_each_GCN NUMBER_OF_EACH_GCN]
+                       [--number_sample_min NUMBER_SAMPLE_MIN]
+                       [--number_of_repeat_diffrente NUMBER_OF_REPEAT_DIFFRENTE] [--normal NORMAL]
+		  
+		  
+		  
+	eg. python pipeline_gcn.py -pm /home/storage_1/yuping/GCN/pipeline_GCN/dataset_test/paths_matrices_blood.csv -o /home/storage_1/yuping/GCN/pipeline_GCN/test/ -rt 20 -nG 10 -n 16 -norm False
+	
+(-rt:20 repetitions -nG ramdomly select 10 samples -n : smallest groupe contain 16 samples in the smallest group)
 
-1.add parameter repeat_time(defaut=1)
 
-2.paths_matrices_sub_20.csv and paths_annot_sub_20.csv : separate by comma
 
-3.-o: the path will used for the next step: same path for input_file
 
-4.GCNScript3_JT.r:allowWGCNAThreads(nThreads=20)
+#### optional arguments:
 
-## 2. used of concensus.py
+  -pm PATHS_MATRICES, --paths_matrices PATHS_MATRICES
+                        path to list of paths to count matrices (format organ comma sex comma age_class comma path)
+			
+  -o OUTPUT_DIRECTORY, --output_directory OUTPUT_DIRECTORY
+                        path to the output directory
+			
+  -pthr PEARSON_THRESHOLD, --pearson_threshold PEARSON_THRESHOLD
+                        Pearson correlation threshold (default: 0.8)
+			
+  --repeat_times REPEAT_TIMES, -rt REPEAT_TIMES
+                        number of replications (default: 10)
+			
+  --number_of_each_GCN NUMBER_OF_EACH_GCN, -nG NUMBER_OF_EACH_GCN
+                        number of sample for each GCN (default : 5)
+			
+  --number_sample_min NUMBER_SAMPLE_MIN, -n NUMBER_SAMPLE_MIN
+                        number of samples of smallest groupe (default : 16)
+			
+  --number_of_repeat_diffrente NUMBER_OF_REPEAT_DIFFRENTE, -nd NUMBER_OF_REPEAT_DIFFRENTE
+                        number maximun common between each repeat(default : 2)
+			
+  --normal NORMAL, -norm NORMAL
+                        normalize with deseq or not (default = 'True')
 
-	python concensus.py --input_file /home/storage_1/yuping/GCN/Liver/ --name_of_file filtered_all_cor_0.8.csv --threshold 0.7 --outdir /home/storage_1/yuping/compute_GCN/result_concensus3/
 
-input:
 
---input_file : path to folder which contain all the result batch_gcn_segmentation.py( path should be the same  in batch_gcn_segmentation.py parameter -o)
+#### Desciption of script:
+
+##### R:
+
+GCNScript_normalization.r
+  -- R version 3.6.3
+  -- package : DESeq2 ‘1.26.0’
+
+
+GCNScript4_JT.r
+  -- R version 3.6.3
+  -- package : WGCNA ‘1.70.3’
+
+##### python : 
+
+concensus_package.py : script for table concensus
+
+
   
---name_of_file : which file you want to do te combination(for example if we are intresting in 'liver_class1_male_filtered_all_cor_0.85.csv' we will use filtered_all_cor_0.85.csv)
-    
---threshold : threshold of the ratio (dafault = 0.9): so we filtering the result which ratio > 0.9
-    
---outdir : the path for output
-
-output :
-
-multilayer_edges.csv and multilayer_nodes.csv for each class of age
-
-## 3.script for class of edges and nodes(abdel)
-
-
-
-
-
-
+  
+  
