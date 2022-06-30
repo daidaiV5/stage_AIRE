@@ -32,17 +32,17 @@ def parser():
     :return: variables
     """
     parser = argparse.ArgumentParser(description="Will calculate GCNs for provided matrices paths and "
-                                                 "segment the GCNs at provided thresholds.")
+                                                 "segment the GCNs at provided thresholds.""concensus of the random result")
     parser.add_argument("-pm", "--paths_matrices", type=str, help="path to list of paths to count matrices "
-                                                                  "(format organ tab sex tab age_class tab path)")
+                                                                  "(format organ comma sex comma age_class comma path)")
     parser.add_argument("-o", "--output_directory", type=str, help="path to the output directory")
     parser.add_argument("-pthr", "--pearson_threshold", type=float, help=" Pearson correlation threshold "
                                                                          "(default: 0.8)", default=0.8)
-    parser.add_argument("--repeat_times", "-rt", type=int, help="number of replications (default: 1)", default=10)
-    parser.add_argument("--number_of_each_GCN","-nG",type=int,help="number of sample for each GCN(default : 5)", default=5)
-    parser.add_argument("--number_sample_min","-n",type=int,help="number of sample for each class_age(default : 16)", default=16)
+    parser.add_argument("--repeat_times", "-rt", type=int, help="number of replications (default: 10)", default=10)
+    parser.add_argument("--number_of_each_GCN","-nG",type=int,help="number of sample for each GCN (default : 5)", default=5)
+    parser.add_argument("--number_sample_min","-n",type=int,help="number of samples of smallest groupe (default : 16)", default=16)
     parser.add_argument("--number_of_repeat_diffrente","-nd",type=int,help="number maximun common between each repeat(default : 2)",default=2)
-    parser.add_argument("--normal","-norm",type=str,help="normalize or not", default = 'True')
+    parser.add_argument("--normal","-norm",type=str,help="normalize with deseq or not (default = 'True')", default = 'True')
      
     
     args = parser.parse_args()
